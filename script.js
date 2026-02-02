@@ -39,3 +39,9 @@ async function isBreached(prefix, suffix) {
   }
   return false;
 }
+const entropy = calculateEntropy(pwd);
+document.getElementById("entropy").innerText =
+  "Entropy: " + entropy.toFixed(2) + " bits";
+
+document.getElementById("cracktime").innerText =
+  "Estimated crack time: " + crackTime(entropy);
