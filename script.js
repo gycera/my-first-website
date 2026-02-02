@@ -1,46 +1,41 @@
-function checkPassword() {
+async function checkPassword() {
   const pwd = document.getElementById("password").value;
+  if (!pwd) return;
 
-  const checks = {
-    length: pwd.length >= 12,
-    upper: /[A-Z]/.test(pwd),
-    lower: /[a-z]/.test(pwd),
-    number: /[0-9]/.test(pwd),
-    symbol: /[^A-Za-z0-9]/.test(pwd),
-    common: !isCommonPassword(pwd)
-  };
+  const hash = await sha1(pwd);
+  const prefix = hash.substring(0, 5);
+  const suffix = hash.substring(5);
 
-  updateUI(checks);
-}
-
-function isCommonPassword(pwd) {
-  const common = ["password", "123456", "qwerty", "letmein", "admin"];
-  return common.includes(pwd.toLowerCase());
-}
-
-function updateUI(checks) {
-  let score = 0;
-
-  for (let key in checks) {
-    const item = document.getElementById(key);
-    if (checks[key]) {
-      item.innerText = "✅ " + item.innerText.slice(2);
-      score++;
-    } else {
-      item.innerText = "❌ " + item.innerText.slice(2);
-    }
-  }
+  const breached = await isBreached(prefix, suffix);
 
   const result = document.getElementById("result");
 
-  if (score <= 2) {
-    result.innerText = "Very weak 🚨";
+  if (breached) {
+    result.innerText = "⚠️ Password found in breach dataset";
     result.style.color = "red";
-  } else if (score <= 4) {
-    result.innerText = "Moderate ⚠️";
-    result.style.color = "orange";
   } else {
-    result.innerText = "Strong ✅";
+    result.innerText = "✅ Password not found in known breaches";
     result.style.color = "green";
   }
+}
+
+async function sha1(message) {
+  const msgBuffer = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest("SHA-1", msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+}
+
+async function isBreached(prefix, suffix) {
+  const response = await fetch("breached_hashes.txt");
+  const text = await response.text();
+  const lines = text.split("\n");
+
+  for (let line of lines) {
+    const [p, s] = line.trim().split(":");
+    if (p === prefix && s === suffix) {
+      return true;
+    }
+  }
+  return false;
 }
