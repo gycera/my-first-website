@@ -1,13 +1,23 @@
 <body>
-  <h1>Interactive Counter 🔢</h1>
+  <h1>Password Strength Analyzer 🔐</h1>
 
-  <h2 id="count">0</h2>
+  <input 
+    type="password" 
+    id="password" 
+    placeholder="Enter a password"
+    oninput="checkPassword()"
+  >
 
-  <button onclick="decrease()">➖ Decrease</button>
-  <button onclick="increase()">➕ Increase</button>
+  <p id="result">Start typing...</p>
 
-  <br><br>
-  <a href="about.html">About</a>
+  <ul id="checks">
+    <li id="length">❌ At least 12 characters</li>
+    <li id="upper">❌ Uppercase letter</li>
+    <li id="lower">❌ Lowercase letter</li>
+    <li id="number">❌ Number</li>
+    <li id="symbol">❌ Symbol</li>
+    <li id="common">❌ Not a common password</li>
+  </ul>
 
   <script src="script.js"></script>
 </body>
